@@ -22,41 +22,50 @@ const Navigation = () => (
   </div>
 );
 
-const NavigationAuth = ({ authUser }) => (
-  <>
-    <Link
-      to={ROUTES.HOME}
-      className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 px-2"
-    >
-      Home
-    </Link>
-    <Link
-      to={ROUTES.ACCOUNT}
-      className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 px-2"
-    >
-      Account
-    </Link>
-    {!!authUser.roles[ROLES.ADMIN] && (
+const NavigationAuth = ({ authUser }) =>
+  needsEmailVerification(authUser) ? (
+    <div className="md:flex items-center justify-center">
+      <div className="mr-5 text-md font-bold font-dosis text-true-gray-800 hover:text-cool-gray-700 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 px-2">
+        <span className="uppercase">Account not verified: </span>&nbsp;
+        <span className="text-red-500">Please Verify Email Address</span>
+      </div>
+      <SignOutButton />
+    </div>
+  ) : (
+    <>
       <Link
-        to={ROUTES.ADMIN}
-        className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 active:bg-gray-200 px-2"
+        to={ROUTES.HOME}
+        className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 px-2"
       >
-        Admin
+        Home
       </Link>
-    )}
-
-    {!!authUser.roles[ROLES.USER] && (
       <Link
-        to={ROUTES.USER}
-        className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 active:bg-gray-200 px-2"
+        to={ROUTES.ACCOUNT}
+        className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 px-2"
       >
-        User
+        Account
       </Link>
-    )}
+      {!!authUser.roles[ROLES.ADMIN] && (
+        <Link
+          to={ROUTES.ADMIN}
+          className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 active:bg-gray-200 px-2"
+        >
+          Admin
+        </Link>
+      )}
 
-    <SignOutButton />
-  </>
-);
+      {!!authUser.roles[ROLES.USER] && (
+        <Link
+          to={ROUTES.USER}
+          className="mr-5 text-md font-bold font-dosis text-gray-800 hover:text-gray-500  hover:bg-gray-200 transition duration-150 ease-in-out rounded-full focus:bg-gray-200 active:bg-gray-200 px-2"
+        >
+          User
+        </Link>
+      )}
+
+      <SignOutButton />
+    </>
+  );
 
 const NavigationNonAuth = () => (
   <>
@@ -76,5 +85,10 @@ const NavigationNonAuth = () => (
     </Link>
   </>
 );
+
+const needsEmailVerification = (authUser) =>
+  authUser &&
+  !authUser.emailVerified &&
+  authUser.providerData.map((provider) => provider.providerId).includes('password');
 
 export default Navigation;

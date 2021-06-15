@@ -22,6 +22,7 @@ class StocksBase extends Component {
     this.state = {
       name: '',
       amount: '',
+      jobCollections: [],
       requestedAmount: 0,
       returnedAmount: 0,
       totalRequestedAmount: 0,
@@ -78,6 +79,7 @@ class StocksBase extends Component {
       name: this.state.name,
       amount: this.state.amount,
       requestedAmount: this.state.requestedAmount,
+      jobCollections: this.state.jobCollections,
       returnedAmount: this.state.returnedAmount,
       totalRequestedAmount: this.state.totalRequestedAmount,
       totalReturnedAmount: this.state.totalReturnedAmount,
@@ -171,6 +173,16 @@ class StocksBase extends Component {
     });
   };
 
+  onAddToCollections = (stock, jobCollections) => {
+    const { uid, ...stockSnapshot } = stock;
+
+    this.props.firebase.stock(stock.uid).set({
+      ...stockSnapshot,
+      jobCollections: jobCollections.push(stock.name),
+      editedAt: this.props.firebase.serverValue.TIMESTAMP
+    });
+  };
+
   onNextPage = () => {
     this.setState((state) => ({ limit: state.limit + 3 }), this.onListenForStocks);
   };
@@ -256,6 +268,7 @@ class StocksBase extends Component {
                 onRemoveStock={this.onRemoveStock}
                 onRequestStock={this.onRequestStock}
                 onReturnStock={this.onReturnStock}
+                onAddToCollections={this.onAddToCollections}
                 onApproveRequestedStock={this.onApproveRequestedStock}
                 onApproveReturnedStock={this.onApproveReturnedStock}
                 onDeclineRequestedStock={this.onDeclineRequestedStock}
@@ -293,6 +306,7 @@ const StockList = ({
   onEditStock,
   onRemoveStock,
   onRequestStock,
+  onAddToCollections,
   onReturnStock,
   onApproveRequestedStock,
   onApproveReturnedStock,
@@ -335,6 +349,7 @@ const StockList = ({
                 onRemoveStock={onRemoveStock}
                 onRequestStock={onRequestStock}
                 onReturnStock={onReturnStock}
+                onAddToCollections={onAddToCollections}
                 onApproveRequestedStock={onApproveRequestedStock}
                 onApproveReturnedStock={onApproveReturnedStock}
                 onDeclineRequestedStock={onDeclineRequestedStock}
@@ -433,6 +448,10 @@ class StockItem extends Component {
 
   onSaveDeclineReturnedStock = () => {
     this.props.onDeclineReturnedStock(this.props.stock);
+  };
+
+  onSaveAddToCollections = () => {
+    this.props.onAddToCollections(this.props.stock);
   };
 
   render() {
@@ -789,6 +808,14 @@ class StockItem extends Component {
                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-red-50"
                       >
                         Return
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={this.onSaveAddToCollections}
+                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-red-50"
+                      >
+                        Add to Collections
                       </button>
                     </>
                   )}
