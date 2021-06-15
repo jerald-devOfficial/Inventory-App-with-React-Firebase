@@ -22,7 +22,6 @@ class StocksBase extends Component {
     this.state = {
       name: '',
       amount: '',
-      jobCollections: [],
       requestedAmount: 0,
       returnedAmount: 0,
       totalRequestedAmount: 0,
@@ -79,7 +78,6 @@ class StocksBase extends Component {
       name: this.state.name,
       amount: this.state.amount,
       requestedAmount: this.state.requestedAmount,
-      jobCollections: this.state.jobCollections,
       returnedAmount: this.state.returnedAmount,
       totalRequestedAmount: this.state.totalRequestedAmount,
       totalReturnedAmount: this.state.totalReturnedAmount,
@@ -173,16 +171,6 @@ class StocksBase extends Component {
     });
   };
 
-  onAddToCollections = (stock, jobCollections) => {
-    const { uid, ...stockSnapshot } = stock;
-
-    this.props.firebase.stock(stock.uid).set({
-      ...stockSnapshot,
-      jobCollections: jobCollections.push(stock.name),
-      editedAt: this.props.firebase.serverValue.TIMESTAMP
-    });
-  };
-
   onNextPage = () => {
     this.setState((state) => ({ limit: state.limit + 3 }), this.onListenForStocks);
   };
@@ -268,7 +256,6 @@ class StocksBase extends Component {
                 onRemoveStock={this.onRemoveStock}
                 onRequestStock={this.onRequestStock}
                 onReturnStock={this.onReturnStock}
-                onAddToCollections={this.onAddToCollections}
                 onApproveRequestedStock={this.onApproveRequestedStock}
                 onApproveReturnedStock={this.onApproveReturnedStock}
                 onDeclineRequestedStock={this.onDeclineRequestedStock}
@@ -306,7 +293,6 @@ const StockList = ({
   onEditStock,
   onRemoveStock,
   onRequestStock,
-  onAddToCollections,
   onReturnStock,
   onApproveRequestedStock,
   onApproveReturnedStock,
@@ -349,7 +335,6 @@ const StockList = ({
                 onRemoveStock={onRemoveStock}
                 onRequestStock={onRequestStock}
                 onReturnStock={onReturnStock}
-                onAddToCollections={onAddToCollections}
                 onApproveRequestedStock={onApproveRequestedStock}
                 onApproveReturnedStock={onApproveReturnedStock}
                 onDeclineRequestedStock={onDeclineRequestedStock}
@@ -450,10 +435,6 @@ class StockItem extends Component {
     this.props.onDeclineReturnedStock(this.props.stock);
   };
 
-  onSaveAddToCollections = () => {
-    this.props.onAddToCollections(this.props.stock);
-  };
-
   render() {
     const { authUser, stock, onRemoveStock } = this.props;
     const {
@@ -466,15 +447,9 @@ class StockItem extends Component {
       returnedAmount
     } = this.state;
 
-    const isInvalidRequest = requestedAmount > stock.amount;
+    const isInvalidRequest = requestedAmount > stock.amount || requestedAmount < 1;
 
-    console.log('Stock Amount: ', stock.amount);
-
-    console.log('Requested Amount: ', requestedAmount);
-
-    console.log('Returned Firebase Amount: ', stock.returnedAmount);
-
-    const isInvalidReturn = returnedAmount > stock.requestedAmount;
+    const isInvalidReturn = returnedAmount > stock.totalRequestedAmount || returnedAmount < 1;
 
     const isRequestingOrReturning = requestMode || returnMode;
 
@@ -672,6 +647,7 @@ class StockItem extends Component {
                       <input
                         type="number"
                         min="1"
+                        max={stock.amount}
                         value={requestedAmount}
                         onChange={this.onChangeRequestAmount}
                         class="text-sm leading-5 focus:outline-none focus:text-gray-600"
@@ -697,6 +673,7 @@ class StockItem extends Component {
                       <input
                         type="number"
                         min="1"
+                        max={stock.totalRequestedAmount}
                         value={returnedAmount}
                         onChange={this.onChangeReturnAmount}
                         class="text-sm leading-5 focus:outline-none focus:text-gray-600"
@@ -752,6 +729,7 @@ class StockItem extends Component {
                         <>
                           <button
                             type="button"
+                            disabled={isInvalidRequest}
                             onClick={this.onSaveRequestStock}
                             class={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-blue-50 ${
                               isInvalidRequest && 'opacity-50'
@@ -774,6 +752,7 @@ class StockItem extends Component {
                         <>
                           <button
                             type="button"
+                            disabled={isInvalidReturn}
                             onClick={this.onSaveReturnStock}
                             class={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-50 text-blue-500 hover:bg-blue-500 hover:text-blue-50 ${
                               isInvalidReturn && 'opacity-50'
@@ -808,14 +787,6 @@ class StockItem extends Component {
                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-red-50"
                       >
                         Return
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={this.onSaveAddToCollections}
-                        class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-50 text-red-500 hover:bg-red-500 hover:text-red-50"
-                      >
-                        Add to Collections
                       </button>
                     </>
                   )}

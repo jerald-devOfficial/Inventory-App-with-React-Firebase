@@ -42,7 +42,6 @@ const INITIAL_STATE = {
   email: '',
   passwordOne: '',
   passwordTwo: '',
-  isUser: false,
   isAdmin: false,
   error: null
 };
@@ -55,14 +54,14 @@ class SignUpFormBase extends Component {
   }
 
   onSubmit = (event) => {
-    const { username, email, passwordOne, isUser, isAdmin } = this.state;
+    const { username, email, passwordOne, isAdmin } = this.state;
 
     const roles = {};
     if (isAdmin) {
       roles[ROLES.ADMIN] = ROLES.ADMIN;
     }
 
-    if (isUser) {
+    if (!isAdmin) {
       roles[ROLES.USER] = ROLES.USER;
     }
 
@@ -93,28 +92,15 @@ class SignUpFormBase extends Component {
     this.setState({ [event.target.name]: event.target.value });
   };
 
-  onChangeCheckboxUser = (event) => {
-    this.setState({
-      isUser: event.target.checked
-    });
-  };
-
-  onChangeCheckboxAdmin = (event) => {
-    this.setState({
-      isAdmin: event.target.checked
-    });
+  onChangeCheckbox = (event) => {
+    this.setState({ [event.target.name]: event.target.checked });
   };
 
   render() {
-    const { username, email, passwordOne, passwordTwo, isUser, isAdmin, error } = this.state;
+    const { username, email, passwordOne, passwordTwo, isAdmin, error } = this.state;
 
     const isInvalid =
-      passwordOne !== passwordTwo ||
-      passwordOne === '' ||
-      email === '' ||
-      username === '' ||
-      !isUser ||
-      !isAdmin;
+      passwordOne !== passwordTwo || passwordOne === '' || email === '' || username === '';
 
     return (
       <div className="mt-10">
@@ -211,25 +197,14 @@ class SignUpFormBase extends Component {
             </label>
           </div>
 
-          <div className="grid grid-cols-2 justify-items-center gap-8 mb-6 items-center">
+          <div className="grid grid-cols-1 justify-items-center gap-8 mb-6 items-center">
             <label className="p-4 max-w-xs mx-auto bg-white rounded-xl shadow-md flex items-center space-x-3">
               <input
-                name="role"
-                type="radio"
-                checked={isUser}
-                onChange={this.onChangeCheckboxUser}
-                className="fform-tick appearance-none h-6 w-6 border border-gray-300 rounded-md checked:bg-blue-600 checked:border-transparent focus:outline-none"
-              />
-              <span className="text-gray-900 font-medium">User</span>
-            </label>
-
-            <label className="p-4 max-w-xs mx-auto bg-white rounded-xl shadow-md flex items-center space-x-3">
-              <input
-                name="role"
-                type="radio"
+                name="isAdmin"
+                type="checkbox"
                 checked={isAdmin}
-                onChange={this.onChangeCheckboxAdmin}
-                className="fform-tick appearance-none h-6 w-6 border border-gray-300 rounded-md checked:bg-blue-600 checked:border-transparent focus:outline-none"
+                onChange={this.onChangeCheckbox}
+                className="form-tick appearance-none h-6 w-6 border border-gray-300 rounded-md checked:bg-blue-600 checked:border-transparent focus:outline-none"
               />
               <span className="text-gray-900 font-medium">Admin</span>
             </label>
